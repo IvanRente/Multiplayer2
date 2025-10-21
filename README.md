@@ -78,7 +78,19 @@ which allow you to further bend the network.
 
 To monitor the network a developer can use a statisticsManager.
 This component manages the statistics. Which can be displayerd via the BandwidthDisplay.
-This is a 
+By adding the statisticsManager component to a GameObject.
+It's values can be used like this:
+
+```C#
+StatisticsManager stats = this.GetComponent<StatisticsManager>();
+
+var networkTraffic = stats.GetTrafficData();
+var pingData = stats.GetPingData();
+```
+
+This information can be displayed via the GUI.
+Add the BandwidthDisplay component to the UI.
+Here you can also use this information to make averages or schemes.
 
 # Sources
 Unity Technologies. (2023). Profiler (Version 2.2).  
