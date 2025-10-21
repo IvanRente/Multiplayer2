@@ -17,7 +17,6 @@ public class ConnectionPanel : MonoBehaviour
         _port = (ushort)PlayerPrefs.GetInt("FN_PORT", defaultPort);
     }
 
-    // Wire these to your InputFields (On Value Changed)
     public void OnAddressChanged(string text)
     {
         _address = string.IsNullOrWhiteSpace(text) ? defaultAddress : text.Trim();
@@ -29,7 +28,6 @@ public class ConnectionPanel : MonoBehaviour
         PlayerPrefs.SetInt("FN_PORT", _port);
     }
 
-    // Buttons
     public void StartHost()
     {
         if (!EnsureNM()) return;
@@ -61,7 +59,6 @@ public class ConnectionPanel : MonoBehaviour
         networkManager.ClientManager.StopConnection();
     }
 
-    // Helpers
     bool EnsureNM()
     {
         if (networkManager) return true;
