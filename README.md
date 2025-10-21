@@ -34,18 +34,18 @@ Lastly keep in mind we use Fish-net to facilitate the networking.
 
 # Findings
 
-## Primairy triangle
+## Primary triangle
 
 The developer should keep the wares a player uses in mind.
-There is only a limitied amount of bandwidth consumption and cpu power.
+There is only a limited amount of bandwidth consumption and cpu power.
 Trying to optimize these features gives more room for other features.
 To measure the consumption of the network and cpu.
 The developers can utilize their specified Profiler.
 
 With this data the team or architect can discuss what they find acceptable.
 
-Fish-Net has several features to enhance the bandwith and cpu consuption.
-The main feature to enhance performance is the Area of Intrest System.
+Fish-Net has several features to enhance the bandwidth and cpu consumption.
+The main feature to enhance performance is the Area of Interest System.
 This system makes sure no information is send to those who need not hear it.
 These AoI areas are scalable because it's not one area per scene.
 The area can be any distance from any point.
@@ -63,7 +63,7 @@ Packet Loss which means some messages never arrive.
 
 For Desktop broadband games developers should test with the following values:
 
-- 100-150ms latency
+- 100-150 ms latency
 - 1-3% packet loss
 
 These are regarded as average values. 
