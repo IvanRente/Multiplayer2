@@ -268,3 +268,21 @@ Lag compensation is also known as collider rollback.
 It's the act of placing colliders back in time on the server to provide accurate raycast hit detection regardless of client latencyy.
 To utilize the lag compensation you must also add the RollbackManager script to your Networkmanager object.
 
+# Conclusion
+
+A short sum up of the features and where they fit.
+
+#### Consistency
+* **Prediction**: Ensures that client-side actions are validated by the server, preventing cheating and maintaining consistency across all clients. (Client-side prediction, State forwarding, IReplicateData, IReconcileData)
+* **Lag Compensation** (Collider Rollback): Helps maintain accurate collision detection by placing colliders back in time on the server, ensuring consistency across clients with different latencies.
+* **Network State Events** (e.g., OnAuthenticationResult, OnRemoteConnectionState, OnAuthenticated): Keep clients informed about the current network state, ensuring consistency across all clients.
+
+#### Scalability
+* **Area of Interest** (ObserverManager, Scene Condition): Optimizes network traffic by only sending information to clients that are interested in a specific area or object, reducing unnecessary data transmission.
+* **Broadcasts**: Allows sending messages to multiple objects or clients without requiring a NetworkObject, reducing the number of network messages and improving scalability.
+
+#### Both (Consistency and Scalability)
+* **Remote Procedure Calls** (RPCs: ServerRpc, ObserverRpc, TargetRpc): Ensure consistency by running logic on specific clients or the server, while also improving scalability by reducing the number of network messages.
+* **Server and Client Identification**: Helps ensure consistency by identifying clients and servers, while also improving scalability by allowing for targeted communication.
+* **Ticks** (OnPreTick, OnTick, OnPostTick): Provide a framework for synchronizing game logic across clients and servers, ensuring consistency and scalability.
+
