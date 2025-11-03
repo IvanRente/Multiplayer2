@@ -41,3 +41,34 @@ Provides the source link for direct access to documentation or downloads
 | **How to integrate with FishNet** | Encode mic data, send bytes via FishNet’s channel, decode on the other end.                      | Uses its own WebRTC transport; would require bridging between WebRTC and FishNet. | Capture voice with NAudio, then use Concentus or another codec to compress before sending over FishNet. | Needs a native plugin bridge and manual data streaming through FishNet.               | Requires FMOD C# bindings and custom network streaming code.                                                               | Must capture, format and send raw audio manually through FishNet.                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 | **Works in FishNet**              | Just send voice data                                                                             | Uses a different network system                                                   | Needs extra coding for compression | Needs custom setup and plugin | Complex to integrate | Manual setup, very technical |
 | **Link**                          | https://github.com/lostromb/concentus                                                            | https://github.com/Unity-Technologies/com.unity.webrtc                            | https://github.com/naudio/NAudio                                                                        | https://www.un4seen.com/                                                              | https://www.fmod.com/resources/documentation-api                                                                           | http://www.portaudio.com/                                                           |
+# Group: Multiplayer 2 - Workshop 2
+
+Welcome everyone, today you are going to learn to make a multiplayer game that supports Proximity VioceChat.
+
+#### You are going to add the following things:
+- Setting up game with a FishNet network.
+- Consistency via FishNet components.
+- Scalability via Lobbies.
+- Proximity VoiceChat
+
+## Setting up a game with FishNet.
+You will have this already if you followed the first part of the workshop with the other group (Multiplayer 1) and us (If you didn't follow along you can switch the branches 😄)
+
+If you did follow along, you should have a simple scene with a player that can move around and see other players moving around.
+
+## Achieving prediction (CPS: Client side prediction)
+To achieve client-side prediction, we will implement a simple prediction system for player movement. This will help reduce the perceived latency for players.
+
+
+## Consistency via FishNet components.
+We will add simple components to our network manager to ensure consistency across clients.
+
+### 
+
+
+## Scalability via Lobbies.
+
+
+## Proximity VoiceChat
+To implement proximity voice chat, we will use a voice chat system that allows players to hear each other based on their distance in the game world.
+### Setting up Proximity VoiceChat
