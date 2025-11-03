@@ -41,6 +41,43 @@ Provides the source link for direct access to documentation or downloads
 | **How to integrate with FishNet** | Encode mic data, send bytes via FishNet’s channel, decode on the other end.                      | Uses its own WebRTC transport; would require bridging between WebRTC and FishNet. | Capture voice with NAudio, then use Concentus or another codec to compress before sending over FishNet. | Needs a native plugin bridge and manual data streaming through FishNet.               | Requires FMOD C# bindings and custom network streaming code.                                                               | Must capture, format and send raw audio manually through FishNet.                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 | **Works in FishNet**              | Just send voice data                                                                             | Uses a different network system                                                   | Needs extra coding for compression | Needs custom setup and plugin | Complex to integrate | Manual setup, very technical |
 | **Link**                          | https://github.com/lostromb/concentus                                                            | https://github.com/Unity-Technologies/com.unity.webrtc                            | https://github.com/naudio/NAudio                                                                        | https://www.un4seen.com/                                                              | https://www.fmod.com/resources/documentation-api                                                                           | http://www.portaudio.com/                                                           |
+
+# FishNet Tutorial
+
+In this tutorial, I set up a small multiplayer project in Unity using FishNet to understand how network consistency (**RPC**) works between clients and the server. The goal was to make players move and change color in a way that stays synchronized for everyone.
+
+---
+
+## Tutorial:
+
+1. **Setting up FishNet**  
+   I installed FishNet through the Git URL and added a NetworkManager and Tugboat transport to the scene. Tugboat allows the game to send and receive data locally or online.
+
+
+2. **Creating the Player prefab**  
+   I made a simple Cube as the player, then added the required components:
+    - NetworkObject
+    - NetworkTransform
+    - CharacterController
+    - PlayerMovement
+
+
+3. **Registering the prefab**  
+   I dragged the Player prefab into a Spawnable Prefabs list (inside a Prefab Objects asset) and also assigned it as the Default Player Prefab in the NetworkManager or PlayerSpawner. This allows FishNet to spawn a player automatically when someone connects.
+
+
+4. **Adding player movement**  
+   The `PlayerMovement` script used Unity’s input system, but only worked for the local player by checking `IsOwner`. This way, each player can move independently, and their positions stay synchronized using the `NetworkTransform` component.
+
+
+5. **Adding color change with RPCs**  
+   The `ColorChanger` script used a ServerRpc to send a command from the client to the server whenever the player pressed C, and an ObserversRpc to update everyone’s screens. Pressing C toggles between red and the player’s original color. Both the Host and Client see the same color at the same time.
+
+## Conclusion
+
+This demo showed how FishNet maintains consistency in a multiplayer environment. Using RPCs (Remote Procedure Calls) made it possible to keep both player movement and color changes synchronized between all clients. The ServerRpc ensured that input was processed by the server, while the ObserversRpc broadcasted updates to everyone.
+
+Together with NetworkTransform and ownership checks, these systems allowed me to create a working, consistent multiplayer interaction where both movement and visual changes behave identically for every connected player. This helped me understand how networked actions, data, and visuals stay aligned across different machines in real time.
 # Group: Multiplayer 2 - Workshop 2
 
 Welcome everyone, today you are going to learn to make a multiplayer game that supports Proximity VioceChat.
