@@ -1,15 +1,15 @@
 using UnityEngine;
 using FishNet.Object;
-public class ColorChanger : NetworkBehaviour
+public class ColorChange : NetworkBehaviour
 {
-    private Renderer rend;
+    private Renderer render;
     private Color defaultColor;
     private bool isRed = false;
 
     private void Awake()
     {
-        rend = GetComponent<Renderer>();
-        if (rend != null)
+        render = GetComponent<Renderer>();
+        if (render != null)
             defaultColor = rend.material.color; 
     }
 
@@ -24,18 +24,15 @@ public class ColorChanger : NetworkBehaviour
         }
     }
 
-    // Called on the server when the local player presses C
     [ServerRpc]
     private void ToggleColorServerRpc()
     {
         isRed = !isRed;
         Color newColor = isRed ? Color.red : defaultColor;
 
-        // Send the color change to all clients
         ToggleColorObserversRpc(newColor, isRed);
     }
 
-    // Called on all clients to update visuals
     [ObserversRpc]
     private void ToggleColorObserversRpc(Color color, bool redState)
     {
@@ -45,7 +42,7 @@ public class ColorChanger : NetworkBehaviour
 
     private void SetColor(Color color)
     {
-        if (rend != null)
-            rend.material.color = color;
+        if (render != null)
+            render.material.color = color;
     }
 }

@@ -14,7 +14,6 @@ public class SimpleMovement : NetworkBehaviour
 
     void Update()
     {
-        // Only allow input for this player's owner
         if (!IsOwner)
             return;
 
@@ -23,7 +22,6 @@ public class SimpleMovement : NetworkBehaviour
 
         Vector3 move = new Vector3(h, 0, v);
 
-        // Move relative to world space
         controller.SimpleMove(move * speed);
     }
 }
