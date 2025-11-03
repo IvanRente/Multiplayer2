@@ -8,7 +8,13 @@ public class PlayerNetwork : NetworkBehaviour
     public void ReceiveCreatedLobby(NetworkConnection target, string lobbyId, int lobbyNetworkObjectId)
     {
         Debug.Log($"Created lobby {lobbyId} (objectId {lobbyNetworkObjectId})");
-        // Client can store lobbyNetworkObjectId to join later via LobbyNetworkBehaviour.ServerRpc_RequestJoin
+
+        // Automatically join it after creation
+        var lobbyMgr = LobbyManager.Instance;
+        if (lobbyMgr != null)
+        {
+            lobbyMgr.RequestJoinByNetworkId((uint)lobbyNetworkObjectId, Owner);
+        }
     }
 
     // Receive lobby list payload (simple serialized string)
@@ -16,6 +22,15 @@ public class PlayerNetwork : NetworkBehaviour
     public void ReceiveLobbyList(NetworkConnection target, string payload)
     {
         Debug.Log($"Lobby list: {payload}");
+        var bridge = FindAnyObjectByType<LobbyUIBridge>();
+        if (bridge != null)
+            bridge.PopulateLobbyList(payload);
+    }
+    
+    [Client]
+    public void JoinLobbyByNetworkId(uint lobbyNetworkObjectId)
+    {
+        LobbyManager.Instance.RequestJoinByNetworkId(lobbyNetworkObjectId, Owner);
     }
 
     [TargetRpc]
@@ -33,6 +48,9 @@ public class PlayerNetwork : NetworkBehaviour
     [TargetRpc]
     public void StartGame(NetworkConnection target, string lobbyId)
     {
-        Debug.Log($"Start game for lobby {lobbyId}");
+        Debug.Log($"Starting game for lobby {lobbyId}");
+
+        // Load your gameplay scene (example: "GameScene")
+        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
     }
 }

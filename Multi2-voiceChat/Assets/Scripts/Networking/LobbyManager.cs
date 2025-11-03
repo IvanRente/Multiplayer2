@@ -11,7 +11,8 @@ public class LobbyManager : NetworkBehaviour
         public static LobbyManager Instance;
         public NetworkObject lobbyPrefab;
 
-        private readonly Dictionary<string, LobbyNetworkBehaviour> lobbies;
+        private readonly Dictionary<string, LobbyNetworkBehaviour> lobbies = new();
+
 
         void Awake() => Instance = this;
 
@@ -62,7 +63,6 @@ public class LobbyManager : NetworkBehaviour
 
             var clientCtrl = rConn.FirstObject?.GetComponent<PlayerNetwork>();
             clientCtrl?.ReceiveCreatedLobby(rConn, id, NetworkObject.ObjectId);
-
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -83,7 +83,8 @@ public class LobbyManager : NetworkBehaviour
             var clientCtrl = rConn.FirstObject?.GetComponent<PlayerNetwork>();
             clientCtrl?.ReceiveLobbyList(rConn, payload);
         }
-
+    
+        
         [ServerRpc(RequireOwnership = false)]
         public void RequestJoinByNetworkId(uint lobbyNetworkObjectId, NetworkConnection rConn = null)
         {
@@ -99,7 +100,7 @@ public class LobbyManager : NetworkBehaviour
                 return;
             }
 
-            lobby.RequestJoin(rConn, out var reason);
+            lobby.RequestJoinWrapper(rConn, out var reason);
             if (reason != null)
             {
                 playerComp?.Notify(rConn, reason);
@@ -138,17 +139,34 @@ public class LobbyManager : NetworkBehaviour
                 return;
             }
 
-            // notify all players
             foreach (var p in lobby.Players)
             {
-                var targetConn = ServerManager.Clients[p.connectionId];
-                if (targetConn == null) continue;
-                var targetPlayer = targetConn.FirstObject;
-                var targetComp = targetPlayer?.GetComponent<PlayerNetwork>();
-                targetComp?.StartGame(targetConn, lobby.LobbyId.Value);
+                var conn = ServerManager.Clients[p.connectionId];
+                if (conn == null) continue;
+
+                // Use your player prefab from a Resources folder or a field reference
+                var playerPrefab = Resources.Load<GameObject>("Player");
+                var player = Instantiate(playerPrefab, GetSpawnPoint(p.connectionId), Quaternion.identity);
+                ServerManager.Spawn(player, conn);
+            }
+            
+            foreach (var p in lobby.Players)
+            {
+                var conn = ServerManager.Clients[p.connectionId];
+                var target = conn?.FirstObject?.GetComponent<PlayerNetwork>();
+                target?.StartGame(conn, lobby.LobbyId.Value);
             }
         }
     
+        private Vector3 GetSpawnPoint(int connectionId)
+        {
+            // simple spawn logic
+            var spawns = GameObject.FindGameObjectsWithTag("SpawnPoint");
+            if (spawns.Length == 0)
+                return Vector3.zero;
+            return spawns[connectionId % spawns.Length].transform.position;
+        }
+        
         [Server]
         private void DestroyLobby(string id)
         {

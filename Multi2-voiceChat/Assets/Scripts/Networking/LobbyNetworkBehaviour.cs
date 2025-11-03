@@ -7,9 +7,9 @@ using FishNet.Object.Synchronizing;
 public class LobbyNetworkBehaviour : NetworkBehaviour
 {
     public readonly SyncVar<string> LobbyId = new SyncVar<string>();
-    public SyncVar<string> LobbyName = new SyncVar<string>();
-    public SyncVar<int> MaxPlayers = new IntSyncVar() { Value = 4 };
-    public SyncVar<LobbyState> State = new(LobbyState.Open);
+    public readonly SyncVar<string> LobbyName = new SyncVar<string>();
+    public readonly SyncVar<int> MaxPlayers = new IntSyncVar() { Value = 4 };
+    public readonly SyncVar<LobbyState> State = new(LobbyState.Open);
 
     public readonly SyncList<LobbyPlayer> Players = new SyncList<LobbyPlayer>();
 
@@ -31,8 +31,7 @@ public class LobbyNetworkBehaviour : NetworkBehaviour
         );
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void RequestJoin(NetworkConnection conn, out string reason)
+    public void RequestJoinWrapper(NetworkConnection conn, out string reason)
     {
         reason = null;
         if (State.Value != LobbyState.Open)
@@ -53,13 +52,18 @@ public class LobbyNetworkBehaviour : NetworkBehaviour
             return;
         }
 
+        RequestJoin(conn);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestJoin(NetworkConnection conn)
+    {
         Players.Add(new LobbyPlayer
         {
             connectionId = conn.ClientId,
             displayName = $"P{conn.ClientId}",
             ready = false
         });
-        return;
 
         // if (State.Value != LobbyState.Open)
         // {
@@ -105,20 +109,20 @@ public class LobbyNetworkBehaviour : NetworkBehaviour
         if (Players.Count == 0 || Players[0].connectionId != conn.ClientId)
         {
             reason = "Only host";
-            return ;
+            return;
         }
 
         if (Players.Any(p => !p.ready))
         {
             reason = "Not all ready";
-            return ;
+            return;
         }
 
         RequestStart(conn);
     }
-    
+
     [ServerRpc(RequireOwnership = false)]
-    public void RequestStart(NetworkConnection conn)
+    private void RequestStart(NetworkConnection conn)
     {
         State.Value = LobbyState.InGame;
     }

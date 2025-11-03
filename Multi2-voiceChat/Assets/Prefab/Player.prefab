@@ -50,6 +50,7 @@ GameObject:
   - component: {fileID: -7437628501143229075}
   - component: {fileID: -6824472136862551125}
   - component: {fileID: -6976184878829342691}
+  - component: {fileID: 1325331941935743026}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -443,6 +444,21 @@ MonoBehaviour:
   sensitivity: 1.2
   pitchMin: -85
   pitchMax: 85
+--- !u!114 &1325331941935743026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282684303575326064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aeaf0afdfcba40938662013ddb141be9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerNetwork
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6085044174727297165}
+  _networkObjectCache: {fileID: 0}
 --- !u!1001 &8749011171948808929
 PrefabInstance:
   m_ObjectHideFlags: 0
