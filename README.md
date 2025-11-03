@@ -42,11 +42,9 @@ Provides the source link for direct access to documentation or downloads
 | **Works in FishNet**              | Just send voice data                                                                             | Uses a different network system                                                   | Needs extra coding for compression | Needs custom setup and plugin | Complex to integrate | Manual setup, very technical |
 | **Link**                          | https://github.com/lostromb/concentus                                                            | https://github.com/Unity-Technologies/com.unity.webrtc                            | https://github.com/naudio/NAudio                                                                        | https://www.un4seen.com/                                                              | https://www.fmod.com/resources/documentation-api                                                                           | http://www.portaudio.com/                                                           |
 
-# FishNet Tutorial
+# FishNet
 
-In this tutorial, I set up a small multiplayer project in Unity using FishNet to understand how network consistency (**RPC**) works between clients and the server. The goal was to make players move and change color in a way that stays synchronized for everyone.
-
----
+In this tutorial, I set up a small multiplayer demo in Unity using FishNet to understand how network consistency (**RPC**) works between clients and the server. The goal was to make players move and change color in a way that stays synchronized for everyone.
 
 ## Tutorial:
 
@@ -63,7 +61,7 @@ In this tutorial, I set up a small multiplayer project in Unity using FishNet to
 
 
 3. **Registering the prefab**  
-   I dragged the Player prefab into a Spawnable Prefabs list (inside a Prefab Objects asset) and also assigned it as the Default Player Prefab in the NetworkManager or PlayerSpawner. This allows FishNet to spawn a player automatically when someone connects.
+   I dragged the Player prefab into a Spawnable Prefabs list (inside a Prefab Objects asset) and also assigned it as the Default Player Prefab in the NetworkManager and PlayerSpawner. This allows FishNet to spawn a player automatically when someone connects.
 
 
 4. **Adding player movement**  
@@ -71,7 +69,7 @@ In this tutorial, I set up a small multiplayer project in Unity using FishNet to
 
 
 5. **Adding color change with RPCs**  
-   The `ColorChanger` script used a ServerRpc to send a command from the client to the server whenever the player pressed C, and an ObserversRpc to update everyone’s screens. Pressing C toggles between red and the player’s original color. Both the Host and Client see the same color at the same time.
+   The `ColorChange` script used a ServerRpc to send a command from the client to the server whenever the player pressed C, and an ObserversRpc to update everyone’s screens. Pressing C toggles between red and the player’s original color. Both the Host and Client see the same color at the same time.
 
 ## Conclusion
 
