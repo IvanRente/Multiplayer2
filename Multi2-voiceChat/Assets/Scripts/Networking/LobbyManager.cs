@@ -1,189 +1,117 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using FishNet.Connection;
 using FishNet.Object;
-using FishNet.Transporting;
+using FishNet.Object.Synchronizing;
+using System.Collections.Generic;
+using FishNet.Connection;
+using TMPro;
 using UnityEngine;
 
 public class LobbyManager : NetworkBehaviour
 {
-        public static LobbyManager Instance;
-        public NetworkObject lobbyPrefab;
+    public static LobbyManager Instance;
 
-        private readonly Dictionary<string, LobbyNetworkBehaviour> lobbies = new();
+    private readonly SyncList<LobbyPlayer> lobbyPlayers = new();
+
+    [Header("UI")] public GameObject lobbyUIPanel;
+    public GameObject playerItemPrefab;
+    public Transform playerListParent;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
 
-        void Awake() => Instance = this;
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        // Subscribe to SyncList callback so clients update when server modifies list
 
-        public override void OnStartServer()
+        // initial refresh if already items present
+        RefreshLobbyUI();
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+    }
+
+    public void ClientRequestJoin(string playerName)
+    {
+        if (string.IsNullOrWhiteSpace(playerName)) return;
+
+        // Call the ServerRpc; ownership required by default so the RPC will use sender param
+        ServerAddPlayer(playerName);
+    }
+
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ServerAddPlayer(string playerName, NetworkConnection sender = null)
+    {
+        if (sender == null) return;
+
+        int connectionId = sender.ClientId;
+
+        for (int i = 0; i < lobbyPlayers.Count; i++)
         {
-            base.OnStartServer();
-            ServerManager.OnRemoteConnectionState += OnRemoteConnectionState;
-        }
-
-        public override void OnStopServer()
-        {
-            ServerManager.OnRemoteConnectionState -= OnRemoteConnectionState;
-            base.OnStopServer();
-        }
-
-        private void OnRemoteConnectionState(NetworkConnection connection, RemoteConnectionStateArgs args)
-        {
-            if (args.ConnectionState != RemoteConnectionState.Stopped) return;
-
-            int clientId = connection.ClientId;
-            foreach (var kv in lobbies.ToArray())
+            if (lobbyPlayers[i].ConnectionId == connectionId)
             {
-                var lobby = kv.Value;
-                if (lobby == null) continue;
-
-                lobby.RemovePlayerByClientId(clientId);
-
-                // destroy lobby if empty
-                if (lobby.Players.Count == 0)
-                {
-                    DestroyLobby(kv.Key);
-                }
-            }
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void CreateLobby(string lobbyName, int maxPlayers, NetworkConnection rConn = null)
-        {
-            if (rConn == null) return;
-
-            string id = Guid.NewGuid().ToString();
-            var networkObject = Instantiate(lobbyPrefab);
-            var lobby = networkObject.GetComponent<LobbyNetworkBehaviour>();
-
-            NetworkObject.Spawn(networkObject);
-            lobby.Initialize(id, lobbyName, maxPlayers, rConn);
-            lobbies.Add(id, lobby);
-
-            var clientCtrl = rConn.FirstObject?.GetComponent<PlayerNetwork>();
-            clientCtrl?.ReceiveCreatedLobby(rConn, id, NetworkObject.ObjectId);
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void RequestLobbyList(NetworkConnection rConn = null)
-        {
-            if (rConn == null) return;
-
-            var lines = lobbies.Values.Select(l
-                    => $"{l.LobbyId.Value}|" +
-                       $"{l.LobbyName.Value}|" +
-                       $"{l.Players.Count}|" +
-                       $"{l.MaxPlayers.Value}|" +
-                       $"{(int)l.State.Value}|" +
-                       $"{l.NetworkObject.ObjectId}" //TODO check dodginess
-            );
-
-            var payload = string.Join(";", lines);
-            var clientCtrl = rConn.FirstObject?.GetComponent<PlayerNetwork>();
-            clientCtrl?.ReceiveLobbyList(rConn, payload);
-        }
-    
-        
-        [ServerRpc(RequireOwnership = false)]
-        public void RequestJoinByNetworkId(uint lobbyNetworkObjectId, NetworkConnection rConn = null)
-        {
-            if (rConn == null) return;
-
-            var lobby = GetLobbyByNetworkId(lobbyNetworkObjectId);
-            var clientPlayer = rConn.FirstObject;
-            var playerComp = clientPlayer?.GetComponent<PlayerNetwork>();
-
-            if (lobby == null)
-            {
-                playerComp?.Notify(rConn, "Lobby not found");
+                // Update player name if changed
+                var existing = lobbyPlayers[i];
+                existing.PlayerName = playerName;
+                lobbyPlayers[i] = existing;
                 return;
             }
-
-            lobby.RequestJoinWrapper(rConn, out var reason);
-            if (reason != null)
-            {
-                playerComp?.Notify(rConn, reason);
-                return;
-            }
-
-            playerComp?.AcceptJoin(rConn, lobby.LobbyId.Value, lobby.NetworkObject.ObjectId);
         }
-    
-        [ServerRpc(RequireOwnership = false)]
-        public void SetReady(uint lobbyNetworkObjectId, bool ready, NetworkConnection rConn = null)
+
+        var newPlayer = new LobbyPlayer { PlayerName = playerName, ConnectionId = connectionId };
+        lobbyPlayers.Add(newPlayer);
+
+        Debug.Log($"Server: Player added: {playerName} (conn {connectionId})");
+    }
+
+
+
+
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+        lobbyPlayers.Clear();
+    }
+
+    private void OnLobbyPlayersChanged(SyncListOperation op, int index, LobbyPlayer oldItem, LobbyPlayer newItem)
+    {
+        RefreshLobbyUI();
+    }
+
+    // Rebuild UI list (client-side)
+    public void RefreshLobbyUI()
+    {
+        if (playerListParent == null || playerItemPrefab == null) return;
+
+        // Clear
+        for (int i = playerListParent.childCount - 1; i >= 0; i--)
+            Destroy(playerListParent.GetChild(i).gameObject);
+
+        // Populate
+        foreach (var p in lobbyPlayers)
         {
-            if (rConn == null) return;
-            var lobby = GetLobbyByNetworkId(lobbyNetworkObjectId);
-            if (lobby == null) return;
-            lobby.SetReady(rConn, ready);
-        }
-    
-        [ServerRpc(RequireOwnership = false)]
-        public void RequestStart(uint lobbyNetworkObjectId, NetworkConnection rConn = null)
-        {
-            if (rConn == null) return;
-            var lobby = GetLobbyByNetworkId(lobbyNetworkObjectId);
-            var clientPlayer = rConn.FirstObject;
-            var playerComp = clientPlayer?.GetComponent<PlayerNetwork>();
-            if (lobby == null)
+            var go = Instantiate(playerItemPrefab, playerListParent);
+            // Try TMP first, fallback to UnityEngine.UI.Text
+            var tmp = go.GetComponentInChildren<TMP_Text>();
+            if (tmp != null) tmp.text = p.PlayerName;
+            else
             {
-                playerComp?.Notify(rConn, "Lobby not found"); 
-                return;
-            }
-
-            lobby.RequestStartWrapper(rConn, out string reason);
-            if (reason != null)
-            {
-                playerComp?.Notify(rConn, reason);
-                return;
-            }
-
-            foreach (var p in lobby.Players)
-            {
-                var conn = ServerManager.Clients[p.connectionId];
-                if (conn == null) continue;
-
-                // Use your player prefab from a Resources folder or a field reference
-                var playerPrefab = Resources.Load<GameObject>("Player");
-                var player = Instantiate(playerPrefab, GetSpawnPoint(p.connectionId), Quaternion.identity);
-                ServerManager.Spawn(player, conn);
-            }
-            
-            foreach (var p in lobby.Players)
-            {
-                var conn = ServerManager.Clients[p.connectionId];
-                var target = conn?.FirstObject?.GetComponent<PlayerNetwork>();
-                target?.StartGame(conn, lobby.LobbyId.Value);
+                var uiText = go.GetComponentInChildren<UnityEngine.UI.Text>();
+                if (uiText != null) uiText.text = p.PlayerName;
             }
         }
-    
-        private Vector3 GetSpawnPoint(int connectionId)
-        {
-            // simple spawn logic
-            var spawns = GameObject.FindGameObjectsWithTag("SpawnPoint");
-            if (spawns.Length == 0)
-                return Vector3.zero;
-            return spawns[connectionId % spawns.Length].transform.position;
-        }
-        
-        [Server]
-        private void DestroyLobby(string id)
-        {
-            if (!lobbies.Remove(id, out var lobby)) return;
-            if (lobby != null && lobby.NetworkObject != null && lobby.NetworkObject.IsSpawned)
-                lobby.NetworkObject.Despawn();
-        }
+    }
+}
 
-        public LobbyNetworkBehaviour GetLobbyByNetworkId(uint networkId)
-        {
-            return lobbies.Values.FirstOrDefault(l =>
-                l != null && l.NetworkObject != null && l.NetworkObject.ObjectId == networkId);
-        }
-    
-        public LobbyNetworkBehaviour GetLobbyById(string id)
-        {
-            lobbies.TryGetValue(id, out var l);
-            return l;
-        }
+[System.Serializable]
+public struct LobbyPlayer
+{
+    public string PlayerName;
+    public int ConnectionId;
 }

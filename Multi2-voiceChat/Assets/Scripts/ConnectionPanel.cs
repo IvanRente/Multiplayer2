@@ -91,6 +91,7 @@ public class ConnectionPanel : MonoBehaviour
     {
         if (!EnsureNM()) return;
         ApplyClientEndpoint(_address, _port);
+        networkManager.ClientManager.StartConnection();
     }
 
     public void StopServer()
