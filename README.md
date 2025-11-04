@@ -2,12 +2,19 @@
 
 Welcome everyone, today you are going to learn to make a multiplayer game that supports Proximity VioceChat.
 
-#### You are going to add the following things:
+## Overview
 
-- Setting up game with a FishNet network.
-- Consistency via FishNet components.
-- Scalability via Lobbies.
-- Proximity VoiceChat
+- You will extend the previous multiplayer project by adding:
+
+- Client-side prediction
+
+- Consistency via FishNet prediction/time components
+
+- Lag compensation + rollback
+
+- Scalable lobby flow
+
+- Proximity voice chat
 
 ## Setting up a game with FishNet.
 
@@ -168,10 +175,12 @@ private void ServerFire(PreciseTick pt)
 ```
 
 #### Synchronizing Projectiles
+
 When firing projectiles, ensure that their positions and states are synchronized across all clients using FishNet's
 NetworkObject and NetworkTransform components.
 
-*First the local client, or owning client, fires the projectile. The projectile is spawned locally, then the client tells the server to also fire the projectile. The MAX_PASSED_TIME constant is covered in the next code snippet.*
+*First the local client, or owning client, fires the projectile. The projectile is spawned locally, then the client
+tells the server to also fire the projectile. The MAX_PASSED_TIME constant is covered in the next code snippet.*
 
 ```C#
 /// <summary>
@@ -224,3 +233,237 @@ To implement proximity voice chat, we will use a voice chat system that allows p
 distance in the game world.
 
 ### Setting up Proximity VoiceChat
+
+#### Components
+
+- MicrophoneManager (UI dropdown chooses mic)
+
+- VoiceChat script on Player prefab
+
+- AudioSource on player for playback
+
+#### Modes
+
+- Chat Type: Global / Proximity
+
+- Detection: Push-to-Talk / Voice Activation
+
+#### Use-Case
+
+#### MicrophoneManager
+Game lists all input devices → player selects mic from dropdown → recording uses selected device.
+
+Create a new MonoBehaviour script called `MicrophoneManager`. This script will handle microphone selection and management.
+
+```C#
+private static MicrophoneManager instance;
+
+    public TMP_Dropdown Dropdown;
+    [SerializeField]
+    private List<string> AvailableDevices;
+
+    void Awake()
+    {
+        instance = this;
+    }
+
+    void Start()
+    {
+        foreach(var device in Microphone.devices)
+        {
+            AvailableDevices.Add(device);
+        }
+
+        List<OptionData> options = new List<OptionData>();
+        AvailableDevices.ForEach(x => options.Add(new OptionData(x)));
+        Dropdown.AddOptions(options);
+    }
+
+    public string GetCurrentDeviceName()
+    {
+        return Microphone.devices[Dropdown.value];
+    }
+}
+
+```
+
+#### VoiceChat Script
+Player speaks → nearby players hear audio in 3D → outside range, no audio plays (saves bandwidth).
+
+Create a new NetworkBehaviour script called `VoiceChat`. This script will handle voice chat functionality for each player.
+
+##### Add type of voice chat
+```C#
+public enum ChatType { Global, Proximity }
+```
+
+Define the type of voice chat in the `VoiceChat` script.
+
+##### Voice Detection Modes
+```C#
+public enum DetectionType { PushToTalk, VoiceActivation }
+public DetectionType VoiceDetectionType = DetectionType.PushToTalk;
+```
+
+##### Basic Config
+```C#
+public bool Activated = true;
+public KeyCode PushToTalkKey;
+
+public AudioSource source; 
+public float proximityRange = 10f;
+public float voiceActivationThreshold = 0.002f;
+```
+
+##### Microphone Setup (On Start)
+Initialize the microphone and audio buffers when the client starts.
+```C#
+public override void OnStartClient()
+{
+    base.OnStartClient();
+    if (!IsOwner)
+        return;
+
+    deviceName = Microphone.devices.Length > 0 ? Microphone.devices[0] : null;
+    audioBuffer = new float[bufferSize];
+    sampleData = new float[bufferSize];
+    micDataBuffer = new float[bufferSize];
+    source.playOnAwake = false;
+}
+
+```
+
+##### Update logic
+Continuously check if the player is talking and handle microphone activation.
+```C#
+void Update()
+{
+    if (!Activated || !IsOwner)
+        return;
+
+    string selectedDevice = MicrophoneManager.Instance.GetCurrentDeviceName();
+    if (selectedDevice != deviceName)
+        UpdateMicrophone(selectedDevice);
+
+    switch (VoiceDetectionType)
+    {
+        case DetectionType.PushToTalk:
+            canTalk = Input.GetKey(PushToTalkKey);
+            if (canTalk && microphoneClip == null)
+            {
+                StartMicrophone();
+                StartTalking();
+            }
+            else if (!canTalk && microphoneClip != null)
+            {
+                StopTalking();
+                StopMicrophone();
+            }
+            break;
+
+        case DetectionType.VoiceActivation:
+            if (microphoneClip == null)
+                StartMicrophone();
+
+            canTalk = IsVoiceActivated();
+            break;
+    }
+
+    if (!previousCanTalk && canTalk)
+        StartTalking();
+
+    if (previousCanTalk && !canTalk)
+        StopTalking();
+
+    previousCanTalk = canTalk;
+}
+```
+
+##### Capture & Send Voice Data
+Capture audio data from the microphone and send it to the server.
+```C#
+private IEnumerator TransmitVoice()
+{
+    while (canTalk)
+    {
+        int micPosition = Microphone.GetPosition(deviceName);
+        if (micPosition < position)
+            position = micPosition;
+
+        if (position + bufferSize > micPosition)
+        {
+            yield return null;
+            continue;
+        }
+
+        microphoneClip.GetData(audioBuffer, position);
+        position = (position + bufferSize) % microphoneClip.samples;
+
+        TransmitAudioServerRpc(audioBuffer);
+
+        yield return new WaitForSeconds(bufferSize / (float)sampleRate);
+    }
+}
+```
+
+##### Network RPCs
+Send audio to server
+```C#
+[ServerRpc(RequireOwnership = false)]
+private void TransmitAudioServerRpc(float[] audioData, NetworkConnection sender = null)
+{
+    TransmitAudioObserversRpc(audioData, sender.ClientId);
+}
+```
+Send audio to all clients
+```C#
+[ObserversRpc]
+private void TransmitAudioObserversRpc(float[] audioData, int senderClientId)
+{
+    if (senderClientId == NetworkManager.ClientManager.Connection.ClientId)
+        return;
+
+    PlayReceivedAudio(audioData, senderClientId);
+}
+```
+
+##### Play Audio (Global or Proximity)
+Play received audio based on the chat type (global or proximity).
+```C#
+private void PlayReceivedAudio(float[] audioData, int senderClientId)
+{
+    if (VoiceChatType == ChatType.Proximity)
+    {
+        source.spatialBlend = 1f;
+        source.maxDistance = proximityRange;
+
+        Transform senderTransform = GetPlayerTransform(senderClientId);
+        if (senderTransform != null &&
+            Vector3.Distance(transform.position, senderTransform.position) > proximityRange)
+            return;
+    }
+    else
+    {
+        source.spatialBlend = 0f;
+    }
+
+    AudioClip clip = AudioClip.Create("Voice", audioData.Length, 1, sampleRate, false);
+    clip.SetData(audioData, 0);
+    source.clip = clip;
+    source.Play();
+}
+```
+
+##### Find Player Transform
+Locate the transform of the player sending the audio.
+```C#
+private Transform GetPlayerTransform(int clientId)
+{
+    foreach (var obj in FindObjectsOfType<NetworkObject>())
+        if (obj.Owner.ClientId == clientId)
+            return obj.transform;
+
+    return null;
+}
+
+```
