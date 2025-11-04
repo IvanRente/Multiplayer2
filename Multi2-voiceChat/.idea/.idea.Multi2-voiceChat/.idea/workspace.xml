@@ -20,6 +20,18 @@
   }
 }]]></component>
   <component name="TaskManager">
+<<<<<<< Updated upstream
+=======
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9096a8ca-82e6-4094-8a6c-69a9e6495073" name="Changes" comment="" />
+      <created>1762253147034</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1762253147034</updated>
+      <workItem from="1762253147943" duration="15000" />
+      <workItem from="1762253191107" duration="329000" />
+    </task>
+>>>>>>> Stashed changes
     <servers />
   </component>
   <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
