@@ -46,7 +46,6 @@ GameObject:
   - component: {fileID: 6085044174727297165}
   - component: {fileID: -378933264859560244}
   - component: {fileID: -7067832201401300249}
-  - component: {fileID: 5456983187575990366}
   - component: {fileID: -7437628501143229075}
   - component: {fileID: -6824472136862551125}
   - component: {fileID: -6976184878829342691}
@@ -175,7 +174,7 @@ MonoBehaviour:
   - {fileID: -378933264859560244}
   - {fileID: -7067832201401300249}
   - {fileID: 0}
-  - {fileID: 5456983187575990366}
+  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -185,10 +184,10 @@ MonoBehaviour:
   _isGlobal: 0
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
-  _defaultDespawnType: 0
+  _defaultDespawnType: 1
   NetworkObserver: {fileID: 0}
-  _enablePrediction: 0
-  _predictionType: 0
+  _enablePrediction: 1
+  _predictionType: 1
   _graphicalObject: {fileID: 0}
   _detachGraphicalObject: 0
   _enableStateForwarding: 1
@@ -279,28 +278,6 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
---- !u!114 &5456983187575990366
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6282684303575326064}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2875e5aec174794459d24d744989ecb0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VoiceChat
-  _componentIndexCache: 3
-  _addedNetworkObject: {fileID: 6085044174727297165}
-  _networkObjectCache: {fileID: 6085044174727297165}
-  VoiceChatType: 1
-  VoiceDetectionType: 1
-  Activated: 1
-  PushToTalkKey: 0
-  source: {fileID: -7437628501143229075}
-  proximityRange: 18
-  voiceActivationThreshold: 0.002
 --- !u!82 &-7437628501143229075
 AudioSource:
   m_ObjectHideFlags: 0
