@@ -69,14 +69,36 @@ experience for players.
 Add the PredictionManager component to the NetworkManager GameObject and configure it to handle player movement
 prediction.
 
+![img.png](img.png)
+
+```
+Typically speaking the server will never have more than it's Server Interpolation +/- 1 in queue. However, there is a
+chance if the client is having network issues and is sending inputs in burst the queue could for example go from 0 to 5,
+if 5 of clients inputs came through at once.
+```
+
 #### Configure TimeManager
 
 Add the TimeManager component to the NetworkManager GameObject and set it up to manage time synchronization across
 clients.
 
+![img_1.png](img_1.png)
+
+```
+Once added change the Physics Mode to Time Manager, and you are done.
+```
+
 #### Configure NetworkObject
 
 Add the NetworkObject component to the player prefab to ensure that it is properly synchronized across the network.
+
+![img_2.png](img_2.png)
+
+```
+To begin you must first choose to Enable Prediction. Next you will set the Prediction Type. If you are using a rigidbody or rigidbody2D set the prediction type accordingly. Other is used for non-physics such as character controllers.
+```
+
+Feel free to adjust other settings to expand your curiosity.
 
 ### Lag Compensation
 
@@ -251,9 +273,11 @@ distance in the game world.
 #### Use-Case
 
 #### MicrophoneManager
+
 Game lists all input devices → player selects mic from dropdown → recording uses selected device.
 
-Create a new MonoBehaviour script called `MicrophoneManager`. This script will handle microphone selection and management.
+Create a new MonoBehaviour script called `MicrophoneManager`. This script will handle microphone selection and
+management.
 
 ```C#
 private static MicrophoneManager instance;
@@ -288,11 +312,14 @@ private static MicrophoneManager instance;
 ```
 
 #### VoiceChat Script
+
 Player speaks → nearby players hear audio in 3D → outside range, no audio plays (saves bandwidth).
 
-Create a new NetworkBehaviour script called `VoiceChat`. This script will handle voice chat functionality for each player.
+Create a new NetworkBehaviour script called `VoiceChat`. This script will handle voice chat functionality for each
+player.
 
 ##### Add type of voice chat
+
 ```C#
 public enum ChatType { Global, Proximity }
 ```
@@ -300,12 +327,14 @@ public enum ChatType { Global, Proximity }
 Define the type of voice chat in the `VoiceChat` script.
 
 ##### Voice Detection Modes
+
 ```C#
 public enum DetectionType { PushToTalk, VoiceActivation }
 public DetectionType VoiceDetectionType = DetectionType.PushToTalk;
 ```
 
 ##### Basic Config
+
 ```C#
 public bool Activated = true;
 public KeyCode PushToTalkKey;
@@ -316,7 +345,9 @@ public float voiceActivationThreshold = 0.002f;
 ```
 
 ##### Microphone Setup (On Start)
+
 Initialize the microphone and audio buffers when the client starts.
+
 ```C#
 public override void OnStartClient()
 {
@@ -334,7 +365,9 @@ public override void OnStartClient()
 ```
 
 ##### Update logic
+
 Continuously check if the player is talking and handle microphone activation.
+
 ```C#
 void Update()
 {
@@ -380,7 +413,9 @@ void Update()
 ```
 
 ##### Capture & Send Voice Data
+
 Capture audio data from the microphone and send it to the server.
+
 ```C#
 private IEnumerator TransmitVoice()
 {
@@ -407,7 +442,9 @@ private IEnumerator TransmitVoice()
 ```
 
 ##### Network RPCs
+
 Send audio to server
+
 ```C#
 [ServerRpc(RequireOwnership = false)]
 private void TransmitAudioServerRpc(float[] audioData, NetworkConnection sender = null)
@@ -415,7 +452,9 @@ private void TransmitAudioServerRpc(float[] audioData, NetworkConnection sender 
     TransmitAudioObserversRpc(audioData, sender.ClientId);
 }
 ```
+
 Send audio to all clients
+
 ```C#
 [ObserversRpc]
 private void TransmitAudioObserversRpc(float[] audioData, int senderClientId)
@@ -428,7 +467,9 @@ private void TransmitAudioObserversRpc(float[] audioData, int senderClientId)
 ```
 
 ##### Play Audio (Global or Proximity)
+
 Play received audio based on the chat type (global or proximity).
+
 ```C#
 private void PlayReceivedAudio(float[] audioData, int senderClientId)
 {
@@ -455,7 +496,9 @@ private void PlayReceivedAudio(float[] audioData, int senderClientId)
 ```
 
 ##### Find Player Transform
+
 Locate the transform of the player sending the audio.
+
 ```C#
 private Transform GetPlayerTransform(int clientId)
 {
