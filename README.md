@@ -23,6 +23,7 @@ the game to send and receive data locally or online.
 
 **Creating the Player prefab**  
 I made a simple Cube as the player, then added the required components:
+
 - NetworkObject
 - NetworkTransform
 - CharacterController
@@ -136,9 +137,84 @@ private void Replicate(MotorData md)
 }
 ```
 
-#### Implementing Raycast
+#### Implementing Rollback
+
+The RollbackManager must know how far back in time to place colliders to obtain accurate hit results. When your client
+is to fire their weapon you will want to gather the current PreciseTick and include it with your Fire RPC.
+
+```C#
+[Client]
+private void Fire()
+{
+    // Use LastPacketTick to get the best tick alignment.
+    PreciseTick pt = base.TimeManager.GetPreciseTick(TickType.LastPacketTick);
+    // Call fire on the server.
+    ServerFire(pt);
+}
+
+[ServerRpc]
+private void ServerFire(PreciseTick pt)
+{
+    // Rollback using the precise tick sent in.
+    // Using Physics for 3d rollback, Physics3D for 2d rollback.
+    // Both physics types can be used at once.
+    base.RollbackManager.Rollback(pt, RollbackManager.PhysicsType.Physics, base.IsOwner);
+    // Perform your raycast normally.
+    RaycastHit hit;
+    if (Physics.Raycast(transform.position, transform.forward, out hit)) { }
+    // Return the colliders to their proper positions.
+    base.RollbackManager.Return();
+}
+```
 
 #### Synchronizing Projectiles
+When firing projectiles, ensure that their positions and states are synchronized across all clients using FishNet's
+NetworkObject and NetworkTransform components.
+
+*First the local client, or owning client, fires the projectile. The projectile is spawned locally, then the client tells the server to also fire the projectile. The MAX_PASSED_TIME constant is covered in the next code snippet.*
+
+```C#
+/// <summary>
+/// Projectile to spawn.
+/// </summary>
+[Tooltip("Projectile to spawn.")]
+[SerializeField]
+private PredictedProjectile _projectile;
+/// <summary>
+/// Maximum amount of passed time a projectile may have.
+/// This ensures really laggy players won't be able to disrupt
+/// other players by having the projectile speed up beyond
+/// reason on their screens.
+/// </summary>
+private const float MAX_PASSED_TIME = 0.3f;
+
+/// <summary>
+/// Local client fires weapon.
+/// </summary>
+private void ClientFire()
+{
+    Vector3 position = transform.position;
+    Vector3 direction = transform.forward;
+
+    /* Spawn locally with 0f passed time.
+     * Since this is the firing client
+     * they do not need to accelerate/catch up
+     * the projectile. */
+    SpawnProjectile(position, direction, 0f);
+    // Ask server to also fire passing in current Tick.
+    ServerFire(position, direction, base.TimeManager.Tick);
+}
+
+/// <summary>
+/// Spawns a projectile locally.
+/// </summary>
+private void SpawnProjectile(Vector3 position, Vector3 direction, float passedTime)
+{
+    PredictedProjectile pp = Instantiate(_projectile, position, Quaternion.identity);
+    pp.Initialize(direction, passedTime);
+}#
+
+```
 
 ## Scalability via Lobbies.
 
