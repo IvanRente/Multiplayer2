@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 5836124963693042800}
   - component: {fileID: 2227637291705823881}
   - component: {fileID: 6085044174727297165}
+  - component: {fileID: 8147180627420989856}
   - component: {fileID: -378933264859560244}
   - component: {fileID: -7067832201401300249}
   - component: {fileID: -7437628501143229075}
@@ -208,6 +209,21 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     Scale: {x: 1, y: 1, z: 1}
     IsValid: 1
+--- !u!114 &8147180627420989856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282684303575326064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdd4051694eaea44b9e14e8bac3e7830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStates
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6085044174727297165}
+  _networkObjectCache: {fileID: 0}
 --- !u!114 &-378933264859560244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,7 +263,7 @@ MonoBehaviour:
   _componentIndexCache: 1
   _addedNetworkObject: {fileID: 6085044174727297165}
   _networkObjectCache: {fileID: 6085044174727297165}
-  _componentConfiguration: 0
+  _componentConfiguration: 2
   _synchronizeParent: 0
   _packing:
     Position: 1
