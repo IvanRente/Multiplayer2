@@ -18,11 +18,8 @@ Welcome everyone, today you are going to learn to make a multiplayer game that s
 
 ## Setting up a game with FishNet.
 
-You will have this already if you followed the first part of the workshop with the other group (Multiplayer 1) and us (
+You will have this already if you followed the first part of the workshop with the other group (Multiplayer 1) (
 If you didn't follow along you can switch the branches 😄)
-
-If you did follow along, you should have a simple scene with a player that can move around and see other players moving
-around.
 
 **Setting up FishNet**  
 I installed FishNet through the Git URL and added a NetworkManager and Tugboat transport to the scene. Tugboat allows
