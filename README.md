@@ -69,7 +69,7 @@ experience for players.
 Add the PredictionManager component to the NetworkManager GameObject and configure it to handle player movement
 prediction.
 
-![img.png](/Images/
+![img_2.png](Images/Prediction.png)
 
 ```
 Typically speaking the server will never have more than it's Server Interpolation +/- 1 in queue. However, there is a
@@ -82,7 +82,7 @@ if 5 of clients inputs came through at once.
 Add the TimeManager component to the NetworkManager GameObject and set it up to manage time synchronization across
 clients.
 
-![img_1.png](img_1.png)
+![img_1.png](Images/Screenshot%202025-11-04%20040428.png)
 
 ```
 Once added change the Physics Mode to Time Manager, and you are done.
@@ -92,7 +92,7 @@ Once added change the Physics Mode to Time Manager, and you are done.
 
 Add the NetworkObject component to the player prefab to ensure that it is properly synchronized across the network.
 
-![img_2.png](Images/Prediction.png)
+![img_2.png](Images/N)
 
 ```
 To begin you must first choose to Enable Prediction. Next you will set the Prediction Type. If you are using a rigidbody or rigidbody2D set the prediction type accordingly. Other is used for non-physics such as character controllers.
