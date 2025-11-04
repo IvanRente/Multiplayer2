@@ -103,6 +103,7 @@ Add scripts to handle lag compensation for player actions, ensuring that actions
 network latency.
 
 #### Implementing States
+Add a new NetworkBehaviour Script called PlayerStates.
 
 ```C#
 private void TimeManager_OnTick()
