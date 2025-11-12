@@ -51,6 +51,9 @@ GameObject:
   - component: {fileID: -6824472136862551125}
   - component: {fileID: -6976184878829342691}
   - component: {fileID: -1549725524662143389}
+  - component: {fileID: 4624222537234080001}
+  - component: {fileID: -1120916694157744311}
+  - component: {fileID: -1691345405500790709}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -146,9 +149,9 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
@@ -175,8 +178,9 @@ MonoBehaviour:
   NetworkBehaviours:
   - {fileID: -378933264859560244}
   - {fileID: -7067832201401300249}
-  - {fileID: 0}
   - {fileID: 5456983187575990366}
+  - {fileID: -6976184878829342691}
+  - {fileID: -1549725524662143389}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -292,7 +296,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2875e5aec174794459d24d744989ecb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoiceChat
-  _componentIndexCache: 3
+  _componentIndexCache: 2
   _addedNetworkObject: {fileID: 6085044174727297165}
   _networkObjectCache: {fileID: 6085044174727297165}
   VoiceChatType: 1
@@ -436,9 +440,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fbd7660b23fe0f46aa4530b2bc179cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonFPS
-  _componentIndexCache: 255
+  _componentIndexCache: 3
   _addedNetworkObject: {fileID: 6085044174727297165}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6085044174727297165}
   head: {fileID: 924722276855423136}
   cameraPrefab: {fileID: 4992522821286803510, guid: f4b12b45fc48b0e488196470905abcf8, type: 3}
   sensitivity: 1.2
@@ -456,9 +460,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b301dcf380123b04d9a4d4643fded97c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoiceChat2
-  _componentIndexCache: 255
+  _componentIndexCache: 4
   _addedNetworkObject: {fileID: 6085044174727297165}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6085044174727297165}
   VoiceChatType: 1
   VoiceDetectionType: 0
   Activated: 1
@@ -466,6 +470,58 @@ MonoBehaviour:
   source: {fileID: -7437628501143229075}
   proximityRange: 20
   voiceActivationThreshold: 0.002
+--- !u!114 &4624222537234080001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282684303575326064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7da5d511c5980d449ba6f1ed34b1d29c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WalkieTalkieToggle
+  toggleKey: 116
+--- !u!114 &-1120916694157744311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282684303575326064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2c144b79be377340ac8fe0734b06fa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoiceEnvironmentZone
+--- !u!54 &-1691345405500790709
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6282684303575326064}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &8749011171948808929
 PrefabInstance:
   m_ObjectHideFlags: 0
