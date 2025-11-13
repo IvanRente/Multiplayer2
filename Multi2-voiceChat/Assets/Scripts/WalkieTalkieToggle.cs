@@ -6,6 +6,10 @@ public class WalkieTalkieToggle : MonoBehaviour
     public bool UseRadio { get; private set; } = false;
     void Update()
     {
-        if (Input.GetKeyDown(toggleKey)) UseRadio = !UseRadio;
+        if (Input.GetKeyDown(toggleKey))
+        {
+            UseRadio = !UseRadio;
+            Debug.Log($"[RADIO] UseRadio = {UseRadio}");
+        }
     }
 }
